@@ -38,7 +38,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ slug:
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
-      <PageHeader title="Checkout" description="Pay in full, pay a portion, or buy now and settle later." />
+      <PageHeader title="Checkout" description="Review your items and place your order." />
       <CheckoutForm
         slug={slug}
         total={total}

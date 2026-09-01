@@ -29,16 +29,18 @@ export async function GET() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("products")
-    .select("name, sku, barcode, cost_price, selling_price, current_stock, min_stock, status, unit")
+    .select("name, selling_price, current_stock, categories(name)")
     .eq("organization_id", ctx.organization.id)
     .is("deleted_at", null)
     .order("name");
 
   const body = csv([
-    ["name", "sku", "barcode", "cost_price", "selling_price", "current_stock", "min_stock", "status", "unit"],
-    ...(data ?? []).map((p) => [
-      p.name, p.sku, p.barcode, p.cost_price, p.selling_price, p.current_stock, p.min_stock, p.status, p.unit,
-    ]),
+    ["Item name", "Category", "Price", "Quantity"],
+    ...(data ?? []).map((product) => {
+      const category = product.categories as { name: string } | { name: string }[] | null;
+      const categoryName = Array.isArray(category) ? category[0]?.name : category?.name;
+      return [product.name, categoryName ?? "", product.selling_price, product.current_stock];
+    }),
   ]);
   return download("products.csv", body);
 }

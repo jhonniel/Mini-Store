@@ -1,24 +1,27 @@
 import { updatePassword } from "@/lib/actions/auth";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AuthCard } from "@/components/auth/auth-card";
-import { ActionForm, SubmitButton } from "@/components/shared/action-form";
+import { AuthCard, AuthInput, authButtonClass, authLabelClass } from "@/components/auth/auth-card";
+import { ActionForm } from "@/components/shared/action-form";
 
 export default function ResetPasswordPage() {
   return (
     <AuthCard title="Choose a new password" description="Use at least 8 characters.">
-      <ActionForm action={updatePassword} className="space-y-4">
+      <ActionForm action={updatePassword} className="space-y-5">
         <div className="grid gap-2">
-          <Label htmlFor="password">New password</Label>
-          <Input id="password" name="password" type="password" required className="h-10" />
+          <Label htmlFor="password" className={authLabelClass}>
+            New password
+          </Label>
+          <AuthInput id="password" name="password" type="password" required />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="confirmPassword">Confirm password</Label>
-          <Input id="confirmPassword" name="confirmPassword" type="password" required className="h-10" />
+          <Label htmlFor="confirmPassword" className={authLabelClass}>
+            Confirm password
+          </Label>
+          <AuthInput id="confirmPassword" name="confirmPassword" type="password" required />
         </div>
-        <SubmitButton className="h-10 w-full" size="lg">
+        <button type="submit" className={authButtonClass}>
           Update password
-        </SubmitButton>
+        </button>
       </ActionForm>
     </AuthCard>
   );

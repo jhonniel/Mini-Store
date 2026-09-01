@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireStoreCustomer, requireWorkspace } from "@/lib/auth/session";
 import { getErrorMessage } from "@/lib/utils";
 import { cashChange, isCashMethod } from "@/lib/payments";
@@ -52,7 +53,9 @@ export async function upsertCustomer(formData: FormData, customerId?: string) {
 }
 
 export async function addToCart(slug: string, formData: FormData) {
-  const ctx = await requireStoreCustomer(slug);
+  const productId = String(formData.get("productId") || "");
+  const returnTo = productId ? `/store/${slug}/products/${productId}` : `/store/${slug}`;
+  const ctx = await requireStoreCustomer(slug, returnTo);
   const parsed = cartItemSchema.safeParse({
     productId: formData.get("productId"),
     quantity: formData.get("quantity") || 1,
@@ -98,7 +101,15 @@ export async function addToCart(slug: string, formData: FormData) {
 
   if (error) return { error: getErrorMessage(error, "Unable to add to cart.") };
   revalidatePath(`/store/${slug}/cart`);
+  revalidatePath(`/store/${slug}`);
+  revalidatePath("/");
   return { success: `${product.name} added to cart.` };
+}
+
+export async function buyNow(slug: string, formData: FormData) {
+  const result = await addToCart(slug, formData);
+  if (result && "error" in result && result.error) return result;
+  redirect(`/store/${slug}/checkout`);
 }
 
 export async function updateCartItem(slug: string, itemId: string, quantity: number) {
@@ -114,6 +125,8 @@ export async function updateCartItem(slug: string, itemId: string, quantity: num
     if (error) return { error: getErrorMessage(error, "Unable to update cart.") };
   }
   revalidatePath(`/store/${slug}/cart`);
+  revalidatePath(`/store/${slug}`);
+  revalidatePath("/");
   return { success: "Cart updated." };
 }
 
@@ -166,6 +179,9 @@ export async function checkout(slug: string, formData: FormData) {
 
   const result = data as { order_id: string; order_number: string };
   revalidatePath(`/store/${slug}`);
+  revalidatePath(`/store/${slug}/cart`);
+  revalidatePath(`/store/${slug}/orders`);
+  revalidatePath("/");
   revalidatePath("/dashboard/orders");
   return { success: `Order ${result.order_number} submitted.`, ...result };
 }

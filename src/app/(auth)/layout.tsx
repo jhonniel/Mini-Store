@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Boxes, ShieldCheck, Store, Wallet } from "lucide-react";
 import { brand } from "@/config/brand";
+import { FloatingSnacks } from "@/components/auth/floating-snacks";
 
 const highlights = [
   { icon: Boxes, text: "Live inventory and low-stock alerts" },
@@ -12,14 +13,15 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="grid min-h-dvh bg-background lg:grid-cols-2">
       <aside className="relative hidden flex-col justify-between overflow-hidden bg-[#12382b] p-10 text-white lg:flex">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(110,190,140,0.22),transparent_42%)]" />
-        <Link href="/" className="relative flex items-center gap-2.5 font-semibold tracking-tight">
-          <span className="flex size-10 items-center justify-center rounded-xl bg-white/10">
+        <FloatingSnacks />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(10,32,24,0.12)_0%,rgba(18,56,43,0.08)_50%,rgba(10,32,24,0.22)_100%)]" />
+        <Link href="/" className="relative z-10 flex items-center gap-2.5 font-semibold tracking-tight">
+          <span className="flex size-10 items-center justify-center rounded-full bg-[#7ddea8] text-[#12382b]">
             <Store className="size-5" />
           </span>
           {brand.name}
         </Link>
-        <div className="relative max-w-md space-y-8">
+        <div className="relative z-10 max-w-md space-y-8 [text-shadow:0_2px_14px_rgba(0,0,0,0.55)]">
           <div className="space-y-3">
             <p className="text-3xl font-semibold tracking-tight text-balance">{brand.tagline}</p>
             <p className="text-sm leading-6 text-white/75">
@@ -38,14 +40,18 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </ul>
         </div>
       </aside>
-      <main className="flex min-h-dvh flex-col items-center justify-center px-4 py-10 sm:px-8">
-        <Link href="/" className="mb-8 flex items-center gap-2 font-semibold lg:hidden">
-          <span className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+      <main className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-[#12382b] px-5 py-8 sm:px-8 lg:px-10">
+        <div className="lg:hidden">
+          <FloatingSnacks />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(10,32,24,0.12)_0%,rgba(18,56,43,0.08)_50%,rgba(10,32,24,0.22)_100%)]" />
+        </div>
+        <Link href="/" className="relative z-10 mb-6 flex items-center gap-2 font-semibold text-white lg:hidden">
+          <span className="flex size-10 items-center justify-center rounded-full bg-[#7ddea8] text-[#12382b]">
             <Store className="size-5" />
           </span>
           {brand.name}
         </Link>
-        <div className="w-full max-w-[400px]">{children}</div>
+        <div className="relative z-10 w-full max-w-[420px]">{children}</div>
       </main>
     </div>
   );

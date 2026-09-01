@@ -6,8 +6,8 @@ import { Loader2Icon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getAuthErrorMessage } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { AuthInput, authButtonClass, authErrorClass, authLabelClass } from "@/components/auth/auth-card";
+import { resolveAppHome } from "@/lib/auth/home-path";
 
 export function RegisterForm({ slug, invite }: { slug?: string; invite?: string }) {
   const router = useRouter();
@@ -25,7 +25,7 @@ export function RegisterForm({ slug, invite }: { slug?: string; invite?: string 
     try {
       const supabase = createClient();
       const origin = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin;
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -37,19 +37,18 @@ export function RegisterForm({ slug, invite }: { slug?: string; invite?: string 
         setFormError(getAuthErrorMessage(error, error.message));
         return;
       }
+      const user = data.user;
       if (invite) {
         await supabase.rpc("accept_invite", { p_token: invite });
-        router.replace("/");
-        router.refresh();
-        return;
-      }
-      if (slug) {
+      } else if (slug) {
         await supabase.rpc("join_store_as_customer", { p_slug: slug });
-        router.replace("/");
+      }
+      if (user) {
+        router.replace(await resolveAppHome(supabase, user.id, slug ? `/store/${slug}` : undefined));
         router.refresh();
         return;
       }
-      router.replace("/onboarding");
+      router.replace(invite || slug ? "/" : "/onboarding");
       router.refresh();
     } catch (err) {
       setFormError(getAuthErrorMessage(err, "Unable to create your account."));
@@ -60,44 +59,45 @@ export function RegisterForm({ slug, invite }: { slug?: string; invite?: string 
 
   return (
     <>
-      {formError ? (
-        <p className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {formError}
-        </p>
-      ) : null}
-      <form className="space-y-4" onSubmit={handleSubmit}>
+      {formError ? <p className={authErrorClass}>{formError}</p> : null}
+      <form className="space-y-5" onSubmit={handleSubmit}>
         <div className="grid gap-2">
-          <Label htmlFor="fullName">Full name</Label>
-          <Input id="fullName" name="fullName" required autoComplete="name" placeholder="Maria Santos" className="h-10" />
+          <Label htmlFor="fullName" className={authLabelClass}>
+            Full name
+          </Label>
+          <AuthInput id="fullName" name="fullName" required autoComplete="name" placeholder="Maria Santos" />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
+          <Label htmlFor="email" className={authLabelClass}>
+            Email
+          </Label>
+          <AuthInput
             id="email"
             name="email"
             type="email"
             required
             autoComplete="email"
+            inputMode="email"
             placeholder="you@example.com"
-            className="h-10"
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
+          <Label htmlFor="password" className={authLabelClass}>
+            Password
+          </Label>
+          <AuthInput
             id="password"
             name="password"
             type="password"
             required
             autoComplete="new-password"
             placeholder="At least 8 characters"
-            className="h-10"
           />
         </div>
-        <Button type="submit" className="h-10 w-full" size="lg" disabled={pending}>
+        <button type="submit" className={authButtonClass} disabled={pending}>
           {pending ? <Loader2Icon className="animate-spin" /> : null}
           Create account
-        </Button>
+        </button>
       </form>
     </>
   );

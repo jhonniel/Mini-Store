@@ -4,13 +4,13 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { PriceDisplay } from "@/components/shared/price-display";
 import { ProductStatusBadge, StockBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { requireWorkspace } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { formatNumber, profitMargin, profitPerUnit } from "@/lib/money";
 import { hasPermission } from "@/config/permissions";
 import { ProductsToolbar } from "@/components/products/products-toolbar";
+import { CsvImportCard } from "@/components/products/csv-import-card";
 import type { Category, Product } from "@/types";
 
 export default async function ProductsPage({
@@ -58,13 +58,23 @@ export default async function ProductsPage({
     <div className="space-y-6">
       <PageHeader
         title="Products"
-        description="Catalog, pricing, and stock at a glance."
+        description="Add items here to show them on the customer menu. Active products with a price are available to shop."
         actions={
           canCreate ? (
-            <Button render={<Link href="/dashboard/products/new" />}>Add product</Button>
-          ) : null
+            <>
+              <Button variant="outline" render={<a href="/api/export/products" />}>
+                Export CSV
+              </Button>
+              <Button render={<Link href="/dashboard/products/new" />}>Add product</Button>
+            </>
+          ) : (
+            <Button variant="outline" render={<a href="/api/export/products" />}>
+              Export CSV
+            </Button>
+          )
         }
       />
+      {canCreate ? <CsvImportCard /> : null}
       <ProductsToolbar
         query={params.q ?? ""}
         status={params.status ?? "all"}

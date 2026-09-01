@@ -29,8 +29,8 @@ export function CheckoutForm({
   methods: PaymentMethod[];
 }) {
   const router = useRouter();
-  const [paymentType, setPaymentType] = useState(allowPayLater ? "pay_later" : "full");
-  const [amountPaid, setAmountPaid] = useState(allowPayLater ? "0" : String(total));
+  const [paymentType, setPaymentType] = useState("full");
+  const [amountPaid, setAmountPaid] = useState(String(total));
   const [methodId, setMethodId] = useState(methods[0]?.id ?? "cash");
   const remaining = Math.max(total - Number(amountPaid || 0), 0);
   const selected = methods.find((method) => method.id === methodId);

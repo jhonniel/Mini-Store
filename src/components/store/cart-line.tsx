@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { updateCartItem } from "@/lib/actions/commerce";
 import { Button } from "@/components/ui/button";
 import { PriceDisplay } from "@/components/shared/price-display";
@@ -19,10 +20,12 @@ export function CartLine({
   quantity: number;
   currency: string;
 }) {
+  const router = useRouter();
   const subtotal = Number(product.selling_price) * quantity;
   async function change(next: number) {
     const result = await updateCartItem(slug, itemId, next);
     if (result.error) toast.error(result.error);
+    else router.refresh();
   }
   return (
     <div className="flex flex-col gap-3 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between">

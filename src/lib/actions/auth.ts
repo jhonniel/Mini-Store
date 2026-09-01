@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthErrorMessage, getErrorMessage, slugify } from "@/lib/utils";
+import { resolveAppHome } from "@/lib/auth/home-path";
 import {
   forgotPasswordSchema,
   loginSchema,
@@ -26,23 +27,26 @@ export async function signIn(formData: FormData) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid login details." };
   }
 
+  let home = "/";
   try {
     const supabase = await createClient();
-    const { error } = await supabase.auth.signInWithPassword(parsed.data);
+    const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
     if (error) {
       console.error("[signIn]", error.name, error.message);
       return { error: getAuthErrorMessage(error, error.message) };
     }
+    if (!data.user) return { error: "No account found for that email." };
+    const { data: profile } = await supabase.from("profiles").select("id").eq("id", data.user.id).maybeSingle();
+    if (!profile) {
+      await supabase.auth.signOut();
+      return { error: "This account is not in the store database. Ask an admin to add you first." };
+    }
+    home = await resolveAppHome(supabase, data.user.id, String(formData.get("next") || "/"));
   } catch (error) {
     return { error: getAuthErrorMessage(error) };
   }
 
-  const requested = String(formData.get("next") || "/");
-  const next =
-    requested.startsWith("/store/") || requested === "/"
-      ? requested
-      : "/";
-  redirect(next);
+  redirect(home);
 }
 
 export async function signUp(formData: FormData) {
@@ -59,9 +63,10 @@ export async function signUp(formData: FormData) {
   }
 
   let supabase;
+  let userId: string | undefined;
   try {
     supabase = await createClient();
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
       options: {
@@ -70,21 +75,28 @@ export async function signUp(formData: FormData) {
       },
     });
     if (error) return { error: getAuthErrorMessage(error, error.message) };
+    userId = data.user?.id;
   } catch (error) {
     return { error: getAuthErrorMessage(error, "Unable to create your account.") };
   }
 
   if (parsed.data.invite) {
     await supabase.rpc("accept_invite", { p_token: parsed.data.invite });
-    redirect("/");
-  }
-
-  if (parsed.data.storeSlug) {
+  } else if (parsed.data.storeSlug) {
     await supabase.rpc("join_store_as_customer", { p_slug: parsed.data.storeSlug });
-    redirect("/");
   }
 
-  redirect("/onboarding");
+  if (userId) {
+    redirect(
+      await resolveAppHome(
+        supabase,
+        userId,
+        parsed.data.storeSlug ? `/store/${parsed.data.storeSlug}` : undefined
+      )
+    );
+  }
+
+  redirect(parsed.data.invite || parsed.data.storeSlug ? "/" : "/onboarding");
 }
 
 export async function signOut() {
@@ -123,7 +135,10 @@ export async function updatePassword(formData: FormData) {
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
   if (error) return { error: error.message };
-  redirect("/");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  redirect(user ? await resolveAppHome(supabase, user.id) : "/");
 }
 
 export async function createBusiness(formData: FormData) {
@@ -154,7 +169,7 @@ export async function createBusiness(formData: FormData) {
   const { cookies } = await import("next/headers");
   const cookieStore = await cookies();
   cookieStore.set("sf-org", String(data), { path: "/" });
-  redirect("/");
+  redirect("/dashboard");
 }
 
 export async function updateProfile(formData: FormData) {

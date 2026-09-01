@@ -25,7 +25,10 @@ export default async function NewProductPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <PageHeader title="Add product" description="Cost, selling price, and stock are stored as numbers — not formatted currency." />
+      <PageHeader
+        title="Add product"
+        description="Active items appear on the customer menu. Set a selling price and stock so customers can order."
+      />
       <ProductForm action={action} categories={(categories ?? []) as Category[]} currency={ctx.organization.currency} />
     </div>
   );

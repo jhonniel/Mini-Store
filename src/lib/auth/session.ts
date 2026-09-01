@@ -64,7 +64,12 @@ export async function requireWorkspace(permission?: PermissionKey): Promise<Memb
     if (anyMembership.length === 0) {
       redirect("/onboarding");
     }
-    redirect("/forbidden");
+    const { data: shop } = await supabase
+      .from("organizations")
+      .select("slug")
+      .eq("id", anyMembership[0].organization_id)
+      .maybeSingle();
+    redirect(shop?.slug ? `/store/${shop.slug}` : "/");
   }
 
   const membership =
@@ -99,8 +104,8 @@ export async function requireWorkspace(permission?: PermissionKey): Promise<Memb
   return context;
 }
 
-export async function requireStoreCustomer(slug: string) {
-  const { supabase, user } = await requireUser(`/store/${slug}`);
+export async function requireStoreCustomer(slug: string, next = `/store/${slug}`) {
+  const { supabase, user } = await requireUser(next);
   const { data: organization } = await supabase
     .from("organizations")
     .select("*")

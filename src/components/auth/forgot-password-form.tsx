@@ -5,8 +5,7 @@ import { Loader2Icon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getAuthErrorMessage } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { AuthInput, authButtonClass, authErrorClass, authLabelClass } from "@/components/auth/auth-card";
 
 export function ForgotPasswordForm() {
   const [formError, setFormError] = useState("");
@@ -39,23 +38,23 @@ export function ForgotPasswordForm() {
 
   return (
     <>
-      {formError ? (
-        <p className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {formError}
+      {formError ? <p className={authErrorClass}>{formError}</p> : null}
+      {success ? (
+        <p className="mb-4 rounded-xl border border-[#7ddea8]/30 bg-[#7ddea8]/10 px-3 py-2.5 text-sm text-[#7ddea8]">
+          {success}
         </p>
       ) : null}
-      {success ? (
-        <p className="mb-4 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-sm">{success}</p>
-      ) : null}
-      <form className="space-y-4" onSubmit={handleSubmit}>
+      <form className="space-y-5" onSubmit={handleSubmit}>
         <div className="grid gap-2">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" name="email" type="email" required className="h-10" />
+          <Label htmlFor="email" className={authLabelClass}>
+            Email
+          </Label>
+          <AuthInput id="email" name="email" type="email" required autoComplete="email" />
         </div>
-        <Button type="submit" className="h-10 w-full" size="lg" disabled={pending}>
+        <button type="submit" className={authButtonClass} disabled={pending}>
           {pending ? <Loader2Icon className="animate-spin" /> : null}
           Send reset link
-        </Button>
+        </button>
       </form>
     </>
   );

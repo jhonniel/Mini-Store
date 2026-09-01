@@ -164,8 +164,8 @@ export function ProductForm({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="active">Active — shown on the menu</SelectItem>
+              <SelectItem value="draft">Draft — hidden from the menu</SelectItem>
               <SelectItem value="archived">Archived</SelectItem>
             </SelectContent>
           </Select>

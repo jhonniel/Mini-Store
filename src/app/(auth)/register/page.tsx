@@ -14,9 +14,9 @@ export default async function RegisterPage({
       description="One account for everyone. After you sign in, your role controls whether you shop or manage the store."
     >
       <RegisterForm slug={params.slug} invite={params.invite} />
-      <p className="mt-6 text-center text-sm text-muted-foreground">
+      <p className="mt-6 text-center text-sm text-white/55">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-primary hover:underline">
+        <Link href="/login" className="font-medium text-[#7ddea8] hover:underline">
           Sign in
         </Link>
       </p>

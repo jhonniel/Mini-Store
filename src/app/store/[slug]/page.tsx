@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPublicStore } from "@/lib/auth/session";
+import { getPublicStore, getUser } from "@/lib/auth/session";
 import { ProductMenu } from "@/components/store/product-menu";
 import type { Category, Product } from "@/types";
 
@@ -13,7 +13,7 @@ export default async function StorePage({
 }) {
   const { slug } = await params;
   const query = await searchParams;
-  const { supabase, organization } = await getPublicStore(slug);
+  const [{ supabase, organization }, { user }] = await Promise.all([getPublicStore(slug), getUser()]);
   if (!organization) notFound();
 
   const sort = query.sort || "category";
@@ -59,6 +59,7 @@ export default async function StorePage({
         currency={organization.currency}
         storeSlug={slug}
         productHref={(product) => `/store/${slug}/products/${product.id}`}
+        signedIn={Boolean(user)}
       />
       <p className="text-center text-sm text-muted-foreground">
         New here?{" "}

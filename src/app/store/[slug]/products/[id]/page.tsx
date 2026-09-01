@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
-import { AddToCartButton } from "@/components/products/product-card";
+import { PurchaseActions } from "@/components/products/product-card";
 import { PriceDisplay } from "@/components/shared/price-display";
 import { StockRemaining } from "@/components/shared/status-badge";
-import { getPublicStore } from "@/lib/auth/session";
+import { getPublicStore, getUser } from "@/lib/auth/session";
 import Image from "next/image";
 
 export default async function ProductDetailStorePage({
@@ -11,7 +11,7 @@ export default async function ProductDetailStorePage({
   params: Promise<{ slug: string; id: string }>;
 }) {
   const { slug, id } = await params;
-  const { supabase, organization } = await getPublicStore(slug);
+  const [{ supabase, organization }, { user }] = await Promise.all([getPublicStore(slug), getUser()]);
   if (!organization) notFound();
   const { data: product } = await supabase
     .from("products")
@@ -41,7 +41,12 @@ export default async function ProductDetailStorePage({
         <p className="text-sm text-muted-foreground">
           SKU {product.sku ?? "—"} · {product.unit}
         </p>
-        <AddToCartButton slug={slug} productId={product.id} disabled={Number(product.current_stock) <= 0} />
+        <PurchaseActions
+          slug={slug}
+          productId={product.id}
+          maxQuantity={Number(product.current_stock)}
+          signedIn={Boolean(user)}
+        />
       </div>
     </div>
   );

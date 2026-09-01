@@ -13,6 +13,7 @@ export function ProductMenu({
   currency,
   storeSlug,
   productHref,
+  signedIn = false,
 }: {
   products: Product[];
   categories: Category[];
@@ -23,6 +24,7 @@ export function ProductMenu({
   currency: string;
   storeSlug: string;
   productHref: (product: Product) => string;
+  signedIn?: boolean;
 }) {
   const grouped = groupByCategory(products, categories, sort, categoryId);
 
@@ -56,6 +58,7 @@ export function ProductMenu({
                         slug={storeSlug}
                         productId={product.id}
                         disabled={Number(product.current_stock) <= 0}
+                        signedIn={signedIn}
                       />
                     }
                   />

@@ -76,6 +76,7 @@ export default async function HomePage({
         currency={organization.currency}
         storeSlug={slug}
         productHref={(product) => `/store/${slug}/products/${product.id}`}
+        signedIn={Boolean(store.user)}
       />
       <p className="text-center text-sm text-muted-foreground">
         New here?{" "}

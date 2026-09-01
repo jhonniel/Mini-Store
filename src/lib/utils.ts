@@ -26,8 +26,11 @@ export function getErrorMessage(error: unknown, fallback = "Something went wrong
 
 export function getAuthErrorMessage(error: unknown, fallback = "Unable to sign in.") {
   const message = getErrorMessage(error, fallback);
-  if (/fetch failed|Cannot reach Supabase|Failed to fetch|ECONNRESET|ETIMEDOUT/i.test(message)) {
-    return "Cannot reach Supabase. Check your internet connection and that NEXT_PUBLIC_SUPABASE_URL is set.";
+  if (/fetch failed|Cannot reach Supabase|Failed to fetch|ECONNRESET|ETIMEDOUT|ENOTFOUND/i.test(message)) {
+    return "Cannot reach the database. Check your internet connection.";
+  }
+  if (/invalid login credentials|invalid_credentials|user not found|email not confirmed/i.test(message)) {
+    return "No account found for that email, or the password is incorrect.";
   }
   return message;
 }

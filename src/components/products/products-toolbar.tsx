@@ -10,9 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { importProductsCsv } from "@/lib/actions/products";
-import { toast } from "sonner";
 import type { Category } from "@/types";
 
 export function ProductsToolbar({
@@ -62,7 +59,10 @@ export function ProductsToolbar({
           <SelectItem value="archived">Archived</SelectItem>
         </SelectContent>
       </Select>
-      <Select value={category || "all"} onValueChange={(value) => push({ category: value === "all" ? "" : (value ?? "") })}>
+      <Select
+        value={category || "all"}
+        onValueChange={(value) => push({ category: value === "all" ? "" : (value ?? "") })}
+      >
         <SelectTrigger className="w-44">
           <SelectValue placeholder="Category" />
         </SelectTrigger>
@@ -75,35 +75,6 @@ export function ProductsToolbar({
           ))}
         </SelectContent>
       </Select>
-      <div className="ml-auto flex gap-2">
-        <Button variant="outline" render={<a href="/api/export/products" />}>
-          Export CSV
-        </Button>
-        <label className="inline-flex">
-          <input
-            type="file"
-            accept=".csv"
-            className="hidden"
-            onChange={async (event) => {
-              const file = event.target.files?.[0];
-              if (!file) return;
-              const text = await file.text();
-              const [headerLine, ...lines] = text.split(/\r?\n/).filter(Boolean);
-              const headers = headerLine.split(",").map((h) => h.trim());
-              const rows = lines.map((line) => {
-                const cols = line.split(",");
-                return Object.fromEntries(headers.map((h, i) => [h, cols[i]?.trim() ?? ""]));
-              });
-              const result = (await importProductsCsv(rows)) as { error?: string; success?: string };
-              if (result.error) toast.error(result.error);
-              else toast.success(result.success ?? "Imported products.");
-            }}
-          />
-          <Button variant="outline" type="button">
-            Import CSV
-          </Button>
-        </label>
-      </div>
     </div>
   );
 }

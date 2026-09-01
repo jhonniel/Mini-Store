@@ -128,3 +128,13 @@
     @apply min-h-dvh bg-background font-sans text-foreground;
   }
 }
+
+@keyframes snack-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--snack-rotate, 0deg));
+  }
+  50% {
+    transform: translateY(-12px) rotate(var(--snack-rotate, 0deg));
+  }
+}
