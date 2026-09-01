@@ -69,9 +69,9 @@ function publicUrl(bucket: string, key: string) {
   return `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
 }
 
-function extensionFor(file: { type?: string; name?: string }) {
+function extensionFor(file: { type?: string; name?: string }): { ext: string; contentType: string } | null {
   const fromType = file.type ? ALLOWED[file.type] : undefined;
-  if (fromType) return { ext: fromType, contentType: file.type };
+  if (fromType && file.type) return { ext: fromType, contentType: file.type };
   const name = (file.name || "").toLowerCase();
   if (name.endsWith(".jpg") || name.endsWith(".jpeg")) return { ext: "jpg", contentType: "image/jpeg" };
   if (name.endsWith(".png")) return { ext: "png", contentType: "image/png" };
